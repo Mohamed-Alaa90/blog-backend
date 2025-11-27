@@ -16,9 +16,10 @@ router.get("/about", (req, res) => {
 
     res.render("about",);
 });
-router.get("/posts", (req, res) => {
+router.get("/post/:id", async (req, res) => {
+    const data = await post.findById(req.params.id);
 
-    res.render("posts",);
+    res.render("posts", { data });
 });
 
 module.exports = router;

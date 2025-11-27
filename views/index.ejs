@@ -1,15 +1,18 @@
 <h1 class="text-center mt-4">Home</h1>
 <p class="text-center">Welcome to the homepage!</p>
 
-<section class="artical">
-  <ul class="artical-ul list-unstyled">
-    <% data.forEach(post => { %>
-    <li>
-      <a href="#">
-        <span><%= post.title %></span>
+<section class="articles mt-4">
+  <ul class="articles-ul list-unstyled">
+    <% if (data && data.length > 0) { %> <% data.forEach(post => { %>
+    <li class="d-flex justify-content-between align-items-center py-2">
+      <a href="/post/<%= post._id%>" class="text-decoration-none text-black">
+        <%= post.title %>
       </a>
-      <span><%= post.body %></span>
+      <span><%= post.createAt.toDateString() %></span>
     </li>
-    <% }) %>
+    <hr />
+    <% }) %> <% } else { %>
+    <p class="text-center text-muted">No posts found.</p>
+    <% } %>
   </ul>
 </section>
