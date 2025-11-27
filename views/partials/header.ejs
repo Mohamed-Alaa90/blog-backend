@@ -7,22 +7,37 @@
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navMenu"
+      aria-controls="navMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav me-auto">
+      <!-- Left links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <a class="nav-link" href="/">Home</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/post/">Post</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/about">About</a>
-        </li>
       </ul>
+
+      <!-- Search form -->
+      <form class="d-flex" action="/search" method="POST">
+        <input
+          class="form-control form-control-sm me-2"
+          type="search"
+          placeholder="Search..."
+          name="searchTerm"
+          aria-label="Search"
+        />
+        <button class="btn btn-outline-success btn-sm" type="submit">
+          Search
+        </button>
+      </form>
     </div>
   </div>
 </nav>
