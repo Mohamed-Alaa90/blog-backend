@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  deleteUserProfile,
   getAllUsers,
   getUserProfile,
   updateUserProfile,
@@ -7,11 +8,13 @@ import {
 } from "../controllers/userController.js";
 import {
   verifyToken,
+  verifyTokenAdminAndOnlyUser,
   verifyTokenAndAdmin,
   verifyTokenAndOnlyUser,
 } from "../middlewares/auth.js";
 import { validateObjectId } from "../middlewares/validateObjectId.js";
 import photoUpload from "../middlewares/photoUpload.js";
+
 const router = Router();
 
 router.route("/profile").get(verifyTokenAndAdmin, getAllUsers);
@@ -19,7 +22,8 @@ router.route("/profile").get(verifyTokenAndAdmin, getAllUsers);
 router
   .route("/profile/:id")
   .get(validateObjectId, getUserProfile)
-  .put(validateObjectId, verifyTokenAndOnlyUser, updateUserProfile);
+  .put(validateObjectId, verifyTokenAndOnlyUser, updateUserProfile)
+  .delete(validateObjectId, verifyTokenAdminAndOnlyUser, deleteUserProfile);
 
 router
   .route("/profile/profile-photo-upload")
