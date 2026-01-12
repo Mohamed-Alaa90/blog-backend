@@ -51,3 +51,18 @@ export const createPost = asyncHandler(async (req, res) => {
   });
   fs.unlinkSync(imagePath);
 });
+export const getAllPosts = asyncHandler(async (req, res) => {
+  const POST_PER_PAGE = 3;
+  const { pageNumber, category } = req.query;
+  let post;
+
+  if (pageNumber) {
+    post = await Post.find().skip((pageNumber - 1) * POST_PER_PAGE).limit(POST_PER_PAGE)
+  } else if (category) {
+    post = await Post.find({ category });
+  } else {
+    post = await Post.find()
+  }
+  res.status(200).json(post)
+
+})
