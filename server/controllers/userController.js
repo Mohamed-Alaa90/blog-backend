@@ -80,7 +80,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
         bio: req.body.bio,
       },
     },
-    { new: true }
+    { new: true },
   ).select("-password");
   res.status(200).json({
     success: true,

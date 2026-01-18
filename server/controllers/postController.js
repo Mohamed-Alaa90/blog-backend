@@ -199,3 +199,60 @@ export const updatePost = asyncHandler(async (req, res) => {
     post: updatedPost,
   });
 });
+
+/**
+ * @description update photo of post
+ * @router /api/posts/upload-image/:id
+ * @access private (only admin or post owner)
+ * @method PUT
+ */
+export const updatePostImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: "image is required",
+    });
+  }
+  const post = await Post.findById(req.params.id);
+
+  if (!post) {
+    return res.status(404).json({
+      success: false,
+      message: "Post not found",
+    });
+  }
+
+  if (!req.user.isAdmin && post.user.toString() !== req.user.id) {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied, forbidden",
+    });
+  }
+
+  await cloudinaryRemoveImage(post.image.publicId);
+
+  const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
+  try {
+    const result = await cloudinaryUploadImage(imagePath);
+    const imagePost = await Post.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          image: {
+            url: result.secure_url,
+            publicId: result.public_id,
+          },
+        },
+      },
+      { new: true },
+    ).populate("user", ["-password"]);
+
+    res.status(200).json({
+      success: true,
+      message: "post image updated successfully",
+      post: imagePost,
+    });
+  } finally {
+    fs.unlinkSync(imagePath);
+  }
+});
