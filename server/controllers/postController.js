@@ -38,28 +38,31 @@ export const createPost = asyncHandler(async (req, res) => {
     });
 
   const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
+  let result;
   try {
-    const result = await cloudinaryUploadImage(imagePath);
-
-    const post = await Post.create({
-      title: req.body.title,
-      description: req.body.description,
-      category: req.body.category,
-      user: req.user.id,
-      image: {
-        publicId: result.public_id,
-        url: result.secure_url,
-      },
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Post created successfully",
-      post,
-    });
+    result = await cloudinaryUploadImage(imagePath);
   } finally {
-    fs.unlinkSync(imagePath);
+    fs.promises.unlink(imagePath).catch((err) => {
+      console.error("Error deleting temp image file:", err);
+    });
   }
+
+  const post = await Post.create({
+    title: req.body.title,
+    description: req.body.description,
+    category: req.body.category,
+    user: req.user.id,
+    image: {
+      publicId: result.public_id,
+      url: result.secure_url,
+    },
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Post created successfully",
+    post,
+  });
 });
 
 /**
@@ -138,12 +141,12 @@ export const deletePost = asyncHandler(async (req, res) => {
       message: "Access denied, forbidden",
     });
   }
-
-  await Post.findByIdAndDelete(req.params.id);
-
+  
   if (post.image?.publicId) {
     await cloudinaryRemoveImage(post.image.publicId);
   }
+
+  await Post.findByIdAndDelete(req.params.id);
 
   res.status(200).json({
     success: true,
@@ -229,30 +232,38 @@ export const updatePostImage = asyncHandler(async (req, res) => {
     });
   }
 
-  await cloudinaryRemoveImage(post.image.publicId);
-
   const imagePath = path.join(__dirname, `../images/${req.file.filename}`);
+  let uploadResult;
   try {
-    const result = await cloudinaryUploadImage(imagePath);
-    const imagePost = await Post.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: {
-          image: {
-            url: result.secure_url,
-            publicId: result.public_id,
-          },
+    uploadResult = await cloudinaryUploadImage(imagePath);
+  } finally {
+    fs.promises.unlink(imagePath).catch((err) => {
+      console.error("Error deleting temp image file:", err);
+    });
+  }
+
+  const oldImagePublicId = post.image?.publicId;
+  const imagePost = await Post.findByIdAndUpdate(
+    req.params.id,
+
+    {
+      $set: {
+        image: {
+          url: uploadResult.secure_url,
+          publicId: uploadResult.public_id,
         },
       },
-      { new: true },
-    ).populate("user", ["-password"]);
+    },
+    { new: true },
+  ).populate("user", ["-password"]);
 
-    res.status(200).json({
-      success: true,
-      message: "post image updated successfully",
-      post: imagePost,
-    });
-  } finally {
-    fs.unlinkSync(imagePath);
+  if (oldImagePublicId) {
+    await cloudinaryRemoveImage(oldImagePublicId);
   }
+
+  res.status(200).json({
+    success: true,
+    message: "post image updated successfully",
+    post: imagePost,
+  });
 });
