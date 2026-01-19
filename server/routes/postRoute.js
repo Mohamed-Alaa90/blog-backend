@@ -6,6 +6,7 @@ import {
   deletePost,
   getAllPosts,
   getSinglePost,
+  toggleLikePost,
   updatePost,
   updatePostImage,
 } from "../controllers/postController.js";
@@ -30,4 +31,8 @@ router
     photoUpload.single("image"),
     updatePostImage,
   );
+
+router
+  .route("/:id/toggle-like")
+  .put(validateObjectId, verifyToken, toggleLikePost);
 export default router;

@@ -141,12 +141,11 @@ export const deletePost = asyncHandler(async (req, res) => {
       message: "Access denied, forbidden",
     });
   }
-  
+  await Post.findByIdAndDelete(req.params.id);
+
   if (post.image?.publicId) {
     await cloudinaryRemoveImage(post.image.publicId);
   }
-
-  await Post.findByIdAndDelete(req.params.id);
 
   res.status(200).json({
     success: true,
@@ -255,7 +254,7 @@ export const updatePostImage = asyncHandler(async (req, res) => {
       },
     },
     { new: true },
-  ).populate("user", ["-password"]);
+  );
 
   if (oldImagePublicId) {
     await cloudinaryRemoveImage(oldImagePublicId);
@@ -265,5 +264,39 @@ export const updatePostImage = asyncHandler(async (req, res) => {
     success: true,
     message: "post image updated successfully",
     post: imagePost,
+  });
+});
+
+export const toggleLikePost = asyncHandler(async (req, res) => {
+  const loggedInUserId = req.user.id;
+  const { id: postId } = req.params;
+  const post = await Post.findById(postId);
+  if (!post) {
+    return res.status(404).json({
+      success: false,
+      message: "Post not found",
+    });
+  }
+
+  const isPostAlreadyLiked = post.likes.find(
+    (user) => user.toString() === loggedInUserId,
+  );
+
+  const updatePost = await Post.findByIdAndUpdate(
+    postId,
+    isPostAlreadyLiked
+      ? {
+          $pull: { likes: loggedInUserId },
+        }
+      : {
+          $addToSet: { likes: loggedInUserId },
+        },
+    { new: true },
+  );
+
+  res.status(200).json({
+    success: true,
+    message: isPostAlreadyLiked ? "remove like" : "add like",
+    updatePost,
   });
 });
