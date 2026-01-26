@@ -83,18 +83,21 @@ export const getAllPosts = asyncHandler(async (req, res) => {
     })
       .skip((pageNumber - 1) * POST_PER_PAGE)
       .limit(POST_PER_PAGE)
-      .populate("user", ["-password"]);
+      .populate("user", ["-password"])
+      .populate("comments");
   } else if (pageNumber) {
     post = await Post.find()
       .skip((pageNumber - 1) * POST_PER_PAGE)
       .limit(POST_PER_PAGE)
-      .populate("user", ["-password"]);
+      .populate("user", ["-password"])
+      .populate("comments");
   } else {
     post = await Post.find()
       .sort({
         createdAt: -1,
       })
-      .populate("user", ["-password"]);
+      .populate("user", ["-password"])
+      .populate("comments");
   }
   res.status(200).json(post);
 });
@@ -106,9 +109,9 @@ export const getAllPosts = asyncHandler(async (req, res) => {
  * @method GET
  */
 export const getSinglePost = asyncHandler(async (req, res) => {
-  const post = await Post.findById(req.params.id).populate("user", [
-    "-password",
-  ]);
+  const post = await Post.findById(req.params.id)
+    .populate("user", ["-password"])
+    .populate("comments");
   if (!post) {
     return res.status(404).json({
       success: false,

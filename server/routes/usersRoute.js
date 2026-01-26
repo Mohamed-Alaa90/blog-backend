@@ -15,18 +15,18 @@ import {
 import { validateObjectId } from "../middlewares/validateObjectId.js";
 import photoUpload from "../middlewares/photoUpload.js";
 
-const router = Router();
+const userRouter = Router();
 
-router.route("/profile").get(verifyTokenAndAdmin, getAllUsers);
+userRouter.route("/profile").get(verifyTokenAndAdmin, getAllUsers);
 
-router
+userRouter
   .route("/profile/:id")
   .get(validateObjectId, getUserProfile)
   .put(validateObjectId, verifyTokenAndOnlyUser, updateUserProfile)
   .delete(validateObjectId, verifyTokenAdminAndOnlyUser, deleteUserProfile);
 
-router
+userRouter
   .route("/profile/profile-photo-upload")
   .post(verifyToken, photoUpload.single("image"), uploadUserPhoto);
 
-export default router;
+export default userRouter;

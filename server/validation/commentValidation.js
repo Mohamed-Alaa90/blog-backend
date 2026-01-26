@@ -5,10 +5,12 @@ export const commentCreateValidation = (obj) => {
     postId: Joi.string().required(),
     text: Joi.string().trim().required(),
   });
+  return schema.validate(obj);
 };
 export const commentUpdateValidation = (obj) => {
   const schema = Joi.object({
     postId: Joi.string(),
     text: Joi.string().trim(),
   });
+  return schema.validate(obj);
 };

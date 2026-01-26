@@ -12,18 +12,18 @@ import {
 } from "../controllers/postController.js";
 import { validateObjectId } from "../middlewares/validateObjectId.js";
 
-const router = Router();
+const postRouter = Router();
 
-router
+postRouter
   .route("/")
   .post(verifyToken, photoUpload.single("image"), createPost)
   .get(getAllPosts);
-router
+postRouter
   .route("/:id")
   .get(validateObjectId, getSinglePost)
   .delete(validateObjectId, verifyToken, deletePost)
   .put(validateObjectId, verifyToken, updatePost);
-router
+postRouter
   .route("/:id/image-upload")
   .put(
     validateObjectId,
@@ -32,7 +32,7 @@ router
     updatePostImage,
   );
 
-router
+postRouter
   .route("/:id/toggle-like")
   .put(validateObjectId, verifyToken, toggleLikePost);
-export default router;
+export default postRouter;
